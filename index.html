@@ -15,17 +15,16 @@ html, body {
     width: 100%;
     height: 100%;
     font-family: 'Quicksand', sans-serif;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
-/* Intro screen with background image */
-#introScreen {
+/* --- Intro Slide --- */
+#introSlide {
     position: fixed;
     top:0; left:0;
     width:100%;
     height:100%;
-    background: url('bg.jpg') no-repeat center center/cover;
-
+    background: #d32f2f; /* apple red */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -35,52 +34,36 @@ html, body {
     text-align: center;
 }
 
-/* Optional overlay for romantic tint */
-#introScreen::after {
-    content: "";
-    position: absolute;
-    top:0; left:0;
-    width:100%; height:100%;
-    background: rgba(255,0,50,0.25); /* subtle red tint */
-    z-index: 1;
-}
-
-/* Heart and text */
-#heartEmoji {
+#introHeart {
     font-size: 25vw;
-    opacity: 0;
-    transition: opacity 2s ease-in;
-    z-index: 2;
-    position: relative;
-}
-.pulse {
-    animation: pulse 1.5s ease-in-out infinite alternate;
-}
-@keyframes pulse {
-    0% { transform: scale(1); }
-    100% { transform: scale(1.05); }
+    animation: pulseHeart 1.2s ease-in-out infinite;
+    margin-bottom: 20px;
 }
 
-#valText {
+@keyframes pulseHeart {
+    0% { transform: scale(0.95); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(0.95); }
+}
+
+#introText {
     font-family: 'Pacifico', cursive;
-    font-size: 5vw;
-    margin-top: 20px;
-    opacity: 0;
-    transition: opacity 2s ease-in;
-    z-index: 2;
-    position: relative;
+    font-size: 6vw;
 }
 
-/* Polaroid slideshow */
+/* --- Slideshow --- */
 #slideshow {
     display: flex;
     flex-direction: column;
     align-items: center;
     margin-top: 20px;
-    z-index: 1;
-    display: none; /* hidden initially */
+    width: 100%;
+    height: 100%;
+    background: #ffd6e8; /* baby pink */
+    position: relative;
 }
 
+/* Polaroid */
 .polaroid {
     background: #fff;
     padding: 15px 15px 30px;
@@ -110,12 +93,9 @@ html, body {
     font-size: 4vw;
     color: #ff4d6d;
     min-height: 8vw;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
-/* Floating hearts in slideshow */
+/* Floating hearts */
 .heart-float {
     position: absolute;
     bottom: -30px;
@@ -131,14 +111,14 @@ html, body {
 </head>
 <body>
 
-<!-- Intro Screen -->
-<div id="introScreen">
-    <div id="heartEmoji">❤️</div>
-    <div id="valText">Happy Valentine's Day, Baby 💖</div>
+<!-- Intro Slide -->
+<div id="introSlide">
+    <div id="introHeart">❤️</div>
+    <div id="introText">Happy Valentine’s Day, Baby 💖</div>
 </div>
 
-<!-- Polaroid Slideshow -->
-<div id="slideshow">
+<!-- Slideshow -->
+<div id="slideshow" style="display:none;">
     <div class="polaroid" id="polaroid">
         <img id="photo" src="images/1.jpg">
         <div class="caption" id="message"></div>
@@ -146,17 +126,7 @@ html, body {
 </div>
 
 <script>
-// Fade in heart and text
-const heart = document.getElementById('heartEmoji');
-const valText = document.getElementById('valText');
-const introScreen = document.getElementById('introScreen');
-setTimeout(() => {
-    heart.style.opacity = 1;
-    heart.classList.add('pulse');
-    valText.style.opacity = 1;
-}, 500);
-
-// Polaroid slideshow data
+// --- Polaroid slideshow data ---
 const photos = ["images/1.jpg","images/2.jpg","images/3.jpg","images/4.jpg","images/5.jpg"];
 const messages = [
     "This is where our story began 💕",
@@ -165,6 +135,7 @@ const messages = [
     "With you, love feels easy 💖",
     "Forever starts with us 💗"
 ];
+
 let slideIndex = 0;
 let typing = false;
 
@@ -172,7 +143,9 @@ const polaroid = document.getElementById('polaroid');
 const photo = document.getElementById('photo');
 const message = document.getElementById('message');
 const slideshow = document.getElementById('slideshow');
+const introSlide = document.getElementById('introSlide');
 
+// --- Typewriter effect ---
 function typeMessage(text){
     typing = true;
     message.innerHTML = '';
@@ -196,45 +169,43 @@ function showSlide(){
     },100);
 }
 
-// Swipe up gesture to reveal slideshow
+// --- Swipe up to reveal slideshow ---
 let startY = 0;
 let endY = 0;
-
-introScreen.addEventListener('touchstart', e => { startY = e.touches[0].clientY; });
-introScreen.addEventListener('touchmove', e => { endY = e.touches[0].clientY; });
-introScreen.addEventListener('touchend', e => {
+introSlide.addEventListener('touchstart', e => startY = e.touches[0].clientY);
+introSlide.addEventListener('touchmove', e => endY = e.touches[0].clientY);
+introSlide.addEventListener('touchend', e => {
     const deltaY = startY - endY;
-    if(deltaY > 50){ // swipe up
-        introScreen.style.display = 'none';
+    if(deltaY > 50){ // swipe up threshold
+        introSlide.style.display = 'none';
         slideshow.style.display = 'flex';
         showSlide();
         startFloatingHearts();
     }
 });
 
-// Floating hearts in slideshow
+// --- Floating hearts ---
 function startFloatingHearts(){
     setInterval(()=>{
         const h = document.createElement('div');
         h.className = 'heart-float';
         h.textContent = '❤️';
-        h.style.left = Math.random()*100 + 'vw';
+        h.style.left = Math.random()*100+'vw';
         h.style.fontSize = (14+Math.random()*18)+'px';
         document.body.appendChild(h);
         setTimeout(()=>h.remove(),7000);
     },350);
 }
 
-// Swipe left/right for slides
-let startX = 0;
-let endX = 0;
-polaroid.addEventListener('touchstart', e => { startX = e.touches[0].clientX; });
-polaroid.addEventListener('touchmove', e => { endX = e.touches[0].clientX; });
+// --- Swipe left/right for slides ---
+let startX = 0, endX = 0;
+polaroid.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+polaroid.addEventListener('touchmove', e => endX = e.touches[0].clientX);
 polaroid.addEventListener('touchend', e => {
     const deltaX = endX - startX;
-    if(Math.abs(deltaX)>50){
-        if(deltaX<0 && slideIndex<photos.length-1) slideIndex++;
-        if(deltaX>0 && slideIndex>0) slideIndex--;
+    if(Math.abs(deltaX) > 50){
+        if(deltaX<0 && slideIndex < photos.length-1) slideIndex++;
+        if(deltaX>0 && slideIndex > 0) slideIndex--;
         showSlide();
     }
 });
