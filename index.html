@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our Love Story 💗</title>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@500&display=swap" rel="stylesheet">
+
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: 'Quicksand', sans-serif;
+    overflow-x: hidden;
+}
+
+/* Intro screen with background image */
+#introScreen {
+    position: fixed;
+    top:0; left:0;
+    width:100%;
+    height:100%;
+    background: url('bg.jpg') no-repeat center center/cover;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 10;
+    color: #fff;
+    text-align: center;
+}
+
+/* Optional overlay for romantic tint */
+#introScreen::after {
+    content: "";
+    position: absolute;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: rgba(255,0,50,0.25); /* subtle red tint */
+    z-index: 1;
+}
+
+/* Heart and text */
+#heartEmoji {
+    font-size: 25vw;
+    opacity: 0;
+    transition: opacity 2s ease-in;
+    z-index: 2;
+    position: relative;
+}
+.pulse {
+    animation: pulse 1.5s ease-in-out infinite alternate;
+}
+@keyframes pulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.05); }
+}
+
+#valText {
+    font-family: 'Pacifico', cursive;
+    font-size: 5vw;
+    margin-top: 20px;
+    opacity: 0;
+    transition: opacity 2s ease-in;
+    z-index: 2;
+    position: relative;
+}
+
+/* Polaroid slideshow */
+#slideshow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+    z-index: 1;
+    display: none; /* hidden initially */
+}
+
+.polaroid {
+    background: #fff;
+    padding: 15px 15px 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(255,140,180,0.5);
+    width: 80vw;
+    max-width: 300px;
+    opacity: 0;
+    transform: scale(0.7) rotate(-4deg);
+    transition: all 0.5s ease;
+    margin-bottom: 20px;
+}
+.polaroid.show {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+}
+.polaroid img {
+    width: 100%;
+    height: auto;
+    max-height: 60vw;
+    object-fit: cover;
+    border-radius: 8px;
+}
+.caption {
+    margin-top: 12px;
+    font-family: 'Pacifico', cursive;
+    font-size: 4vw;
+    color: #ff4d6d;
+    min-height: 8vw;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Floating hearts in slideshow */
+.heart-float {
+    position: absolute;
+    bottom: -30px;
+    font-size: 20px;
+    animation: float 6s linear infinite;
+    opacity: 0.8;
+}
+@keyframes float {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-120vh) scale(1.5); opacity: 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- Intro Screen -->
+<div id="introScreen">
+    <div id="heartEmoji">❤️</div>
+    <div id="valText">Happy Valentine's Day, Baby 💖</div>
+</div>
+
+<!-- Polaroid Slideshow -->
+<div id="slideshow">
+    <div class="polaroid" id="polaroid">
+        <img id="photo" src="images/1.jpg">
+        <div class="caption" id="message"></div>
+    </div>
+</div>
+
+<script>
+// Fade in heart and text
+const heart = document.getElementById('heartEmoji');
+const valText = document.getElementById('valText');
+const introScreen = document.getElementById('introScreen');
+setTimeout(() => {
+    heart.style.opacity = 1;
+    heart.classList.add('pulse');
+    valText.style.opacity = 1;
+}, 500);
+
+// Polaroid slideshow data
+const photos = ["images/1.jpg","images/2.jpg","images/3.jpg","images/4.jpg","images/5.jpg"];
+const messages = [
+    "This is where our story began 💕",
+    "Every moment with you is magic ✨",
+    "Your smile melts my heart 🥹",
+    "With you, love feels easy 💖",
+    "Forever starts with us 💗"
+];
+let slideIndex = 0;
+let typing = false;
+
+const polaroid = document.getElementById('polaroid');
+const photo = document.getElementById('photo');
+const message = document.getElementById('message');
+const slideshow = document.getElementById('slideshow');
+
+function typeMessage(text){
+    typing = true;
+    message.innerHTML = '';
+    let t=0;
+    function type(){
+        if(t<text.length){
+            message.innerHTML += text[t];
+            t++;
+            setTimeout(type,70);
+        } else typing=false;
+    }
+    type();
+}
+
+function showSlide(){
+    polaroid.classList.remove('show');
+    setTimeout(()=>{
+        photo.src = photos[slideIndex];
+        photo.onload = ()=> polaroid.classList.add('show');
+        typeMessage(messages[slideIndex]);
+    },100);
+}
+
+// Swipe up gesture to reveal slideshow
+let startY = 0;
+let endY = 0;
+
+introScreen.addEventListener('touchstart', e => { startY = e.touches[0].clientY; });
+introScreen.addEventListener('touchmove', e => { endY = e.touches[0].clientY; });
+introScreen.addEventListener('touchend', e => {
+    const deltaY = startY - endY;
+    if(deltaY > 50){ // swipe up
+        introScreen.style.display = 'none';
+        slideshow.style.display = 'flex';
+        showSlide();
+        startFloatingHearts();
+    }
+});
+
+// Floating hearts in slideshow
+function startFloatingHearts(){
+    setInterval(()=>{
+        const h = document.createElement('div');
+        h.className = 'heart-float';
+        h.textContent = '❤️';
+        h.style.left = Math.random()*100 + 'vw';
+        h.style.fontSize = (14+Math.random()*18)+'px';
+        document.body.appendChild(h);
+        setTimeout(()=>h.remove(),7000);
+    },350);
+}
+
+// Swipe left/right for slides
+let startX = 0;
+let endX = 0;
+polaroid.addEventListener('touchstart', e => { startX = e.touches[0].clientX; });
+polaroid.addEventListener('touchmove', e => { endX = e.touches[0].clientX; });
+polaroid.addEventListener('touchend', e => {
+    const deltaX = endX - startX;
+    if(Math.abs(deltaX)>50){
+        if(deltaX<0 && slideIndex<photos.length-1) slideIndex++;
+        if(deltaX>0 && slideIndex>0) slideIndex--;
+        showSlide();
+    }
+});
+</script>
+
+</body>
+</html>
